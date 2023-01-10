@@ -62,7 +62,7 @@ router.put('/:id', async (req, res) => {
             const data = await projectModels.update(id, newData);
             console.log(data);
             console.log(data);
-            res.json(newData);
+            res.status(200).json(newData);
         }
 
         
@@ -87,9 +87,18 @@ router.delete('/:id', async (req, res) => {
     // IF THERE IS NO PROJECT WITH THE GIVEN ID IT RESPONDS WITH A STATUS CODE 404
 })
 
-router.get('/api/projects/:id/actions', (req, res) => {
-    // RETURNS AN ARRAY OF ACTIONS (COULD BE EMPTY) BELONGING TO A PROJECT WITH THE GIVEN ID
-    // IF THERE IS NO PROJECT WITH THE GIVEN ID IT RESPONDS WITH A STATUS CODE 404
+router.get('/:id/actions', async (req, res) => {
+    const id = req.params.id;
+
+    const project = projectModels.get(id);
+
+    if (!project) {
+        res.sendStatus(404);
+    } else {
+        const actions = await projectModels.getProjectActions(id);
+
+        res.status(200).json(actions);
+    }
 })
 
 module.exports = router;
