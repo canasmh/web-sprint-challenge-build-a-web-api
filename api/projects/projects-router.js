@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const projectModels = require('./projects-model');
+const { checkParams } = require('./projects-middleware');
 
 
 router.get('/', async (req, res) => {
@@ -25,21 +26,11 @@ router.get('/:id', async (req, res) => {
     };
 })
 
-router.post('/', async (req, res) => {
-    const name = req.query.name;
-    const description = req.query.description;
-    const completed = req.query.completed;
-
+router.post('/', checkParams, async (req, res, next) => {
     // RETURNS THE NEWLY CREATED PROJECT AS THE BODY OF THE RESPONSE.
     // IF THE REQUEST BODY IS MISSING ANY OF THE REQUIRED FIELDS IT RESPONDS WITH A STATUS CODE 400
-
-    if (!name || !description) {
-        res.sendStatus(400);
-    } else {
-        const newData = {"name": name, "description": description, "completed": completed === undefined ? false : completed};
-        const data = await projectModels.insert(newData);
-        res.status(200).json(newData);
-    }
+    // console.log(req.body);
+    res.send('post message');
 })
 
 router.put('/:id', async (req, res) => {
