@@ -14,16 +14,15 @@ router.get('/', async (req, res) => {
     res.status(200).json(data);
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkID, async (req, res) => {
     // RETURNS A PROJECT WITH THE GIVEN ID AS THE BODY OF THE RESPONSE
     // IF THERE IS NO PROJECT WITH THE GIVEN ID IT RESPONDS WITH A STATUS CODE 404
-    const id = req.params.id;
-    const data = await projectModels.get(id);
-    if (!data) {
-        res.sendStatus(404);
-    } else {
-        res.status(200).json(data);
-    };
+    try {
+        const project = await projectModels.get(req.params.id);
+        res.status(200).json(project);
+    } catch (err) {
+        next(err);
+    }
 })
 
 router.post('/', checkParams, async (req, res, next) => {
@@ -51,18 +50,15 @@ router.put('/:id', checkID, checkParams, checkCompleted, async (req, res, next) 
     }
 })
 
-router.delete('/:id', async (req, res) => {
-    const id = req.params.id;
-    const project = await projectModels.get(id)
-
-    if (!project) {
-        res.sendStatus(404);
-    } else {
-        const deletedProject = await projectModels.remove(id);
-        res.sendStatus(200);
-    }
+router.delete('/:id', checkID, async (req, res) => {
     // RETURNS NO RESPONSE BODY
     // IF THERE IS NO PROJECT WITH THE GIVEN ID IT RESPONDS WITH A STATUS CODE 404
+    try {
+        const deletedProject = await projectModels.remove(req.params.id);
+        res.sendStatus(204);
+    } catch (err) {
+        next(err);
+    }
 })
 
 router.get('/:id/actions', async (req, res) => {
