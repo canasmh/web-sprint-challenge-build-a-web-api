@@ -1,28 +1,33 @@
 // add middlewares here related to projects
+const projectMethods = require('./projects-model');
+async function checkID(req, res, next) {
+    const id = req.params.id;
 
-async function checkParams(req, res, next) {
-    // console.log('query')
-    // console.log(req.query);
-    console.log('body');
-    console.log(req.body);
+    try {
+        const project = await projectMethods.get(id);
 
-    console.log(req.body.name);
-    // console.log('params');
-    // console.log(req.params);
+        !project
+        ? next({status: 404, message: `Sorry, no project with id ${id} was found`})
+        : next();
+    } catch (err) {
+        next(err);
+    }
 
-    // const body = await req.body;
-    // console.log(body);
-    next();
+}
+function checkParams(req, res, next) {
+    !req.body.name ||
+    !req.body.name.trim() ||
+    !req.body.description || 
+    !req.body.description.trim()
+    ? next({status:400, message: "name and description are required"})
+    : next();
+}
 
-    // !req.body.name ||
-    // !req.body.name.trim() ||
-    // !req.body.description || 
-    // !req.body.description.trim()
-    // ? next({status:400, message: "name and description are required"})
-    // : next();
+function checkCompleted(req, res, next) {
+    req.body.completed === undefined 
+    ? next({status:400, message: "completed status required"}) 
+    : next();
 }
 
 
-module.exports = {
-    checkParams
-}
+module.exports = {checkParams, checkCompleted, checkID}

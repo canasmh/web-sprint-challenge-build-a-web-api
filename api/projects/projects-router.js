@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const projectModels = require('./projects-model');
-const { checkParams } = require('./projects-middleware');
+const { checkID, checkParams, checkCompleted} = require('./projects-middleware');
 
 
 router.get('/', async (req, res) => {
@@ -29,39 +29,26 @@ router.get('/:id', async (req, res) => {
 router.post('/', checkParams, async (req, res, next) => {
     // RETURNS THE NEWLY CREATED PROJECT AS THE BODY OF THE RESPONSE.
     // IF THE REQUEST BODY IS MISSING ANY OF THE REQUIRED FIELDS IT RESPONDS WITH A STATUS CODE 400
-    // console.log(req.body);
-    res.send('post message');
+    try {
+        const insertedData = await projectModels.insert(req.body);
+        res.status(201).json(insertedData);
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.put('/:id', async (req, res) => {
-
-    const id = req.params.id;
-    const name = req.query.name;
-    const description = req.query.description;
-    const completed = req.query.completed;
-    console.log('completed', completed)
-    const oldData = await projectModels.get(id);
-
-    // 
-    if (!oldData) {
-        res.sendStatus(404);
-    } else {
-        if (name === undefined || description === undefined || completed === undefined) {
-            res.sendStatus(400);
-        } else {
-            const newData = {"name": name, "description": description, "completed": completed}
-            const data = await projectModels.update(id, newData);
-            console.log(data);
-            console.log(data);
-            res.status(200).json(newData);
-        }
-
-        
-        
-    };
+router.put('/:id', checkID, checkParams, checkCompleted, async (req, res, next) => {
     // RETURNS THE UPDATED PROJECT AS THE BODY OF THE RESPONSE
     // IF THERE IS NO PROJECT WITH THE GIVEN ID IT RESPONDS WITH A STATUS CODE 404
     // IF THE REQUEST BODY IS MISSING ANY OF THE REQUIRED FIELDS IT RESPONDS WITH A STATUS CODE 400
+    let completed = req.body.completed
+
+    try {
+        const updatedData = await projectModels.update(req.params.id, req.body)
+        res.status(200).json(updatedData);
+    } catch(err) {
+        next(err);
+    }
 })
 
 router.delete('/:id', async (req, res) => {
