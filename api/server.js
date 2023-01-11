@@ -9,7 +9,7 @@ const server = express();
 // Do NOT `server.listen()` inside this file!
 
 server.use(express.json());
-server.use(express.urlencoded());
+server.use(express.urlencoded({extended: false}));
 server.use('/api/projects', projectsRouter);
 server.use('/api/actions', actionsRouter);
 
